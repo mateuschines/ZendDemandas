@@ -1,0 +1,92 @@
+<?php
+session_start();
+$_SESSION['dados'] = ($_SESSION['dados'] ?? []); 
+$cpf = ($_SESSION['dados']['cpf'] ?? null);
+$nome = ($_SESSION['dados']['nome'] ?? null);
+$cep = ($_SESSION['dados']['cep'] ?? null);
+$municipio = ($_SESSION['dados']['municipio'] ?? null);
+$uf = ($_SESSION['dados']['uf'] ?? null);
+$email = ($_SESSION['dados']['email'] ?? null);
+$ddd = ($_SESSION['dados']['ddd'] ?? null);
+$telefone = ($_SESSION['dados']['telefone'] ?? null);
+$assunto = ($_SESSION['dados']['assunto'] ?? null);
+$detalhes = ($_SESSION['dados']['detalhes'] ?? null);
+?>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Sistema de Atendimento a Demandas</title>
+</head>
+<body>
+	<h1>Sistema de Atendimento a Demandas</h1>
+	<?php
+	if (isset($_SESSION['mensagem'])) :
+?>
+<p><?=$_SESSION['mensagem']?></p>			    
+<?php
+        unset($_SESSION['mensagem']);
+	endif;	
+	?>
+	<form method="post" action="<?=$this->url('application',['action'=> 'processar'])?>">
+		<table>
+			<tr>
+				<td>CPF:</td>
+				<td><input type="text" name="cpf" autofocus="autofocus" maxlength="11" value="<?=$cpf?>"/></td>
+			</tr>
+			<tr>
+				<td>Nome do solicitante:</td>
+				<td><input type="text" name="nome" value="<?=$nome?>"/></td>
+			</tr>
+			<tr>
+				<td>CEP:</td>
+				<td><input type="text" name="cep" value="<?=$cep?>" maxlength="8" /></td>
+			</tr>
+			<tr>
+				<td>Município:</td>
+				<td><input type="text" name="municipio" value="<?=$municipio?>"/></td>
+			</tr>
+			<tr>
+				<td>UF:</td>
+				<td><input type="text" name="uf" value="<?=$uf?>" maxlength="2"/></td>
+			</tr>
+			</td>
+			<tr>
+				<td>E-mail:</td>
+				<td><input type="email" name="email" value="<?=$email?>"/></td>
+			</tr>
+			<tr>
+				<td>DDD:</td>
+				<td><input type="number" name="ddd" value="<?=$ddd?>" maxlength="2"/></td>
+			</tr>
+			<tr>
+				<td>Telefone:</td>
+				<td><input type="text" name="telefone" value="<?=$telefone?>"/></td>
+			</tr>
+			<tr>
+				<td>Assunto:</td>
+				<td><input type="text" name="assunto" value="<?=$assunto?>"/></td>
+			</tr>
+		</table>
+		Detalhes:<br/>
+		<textarea name="detalhes" rows="10" cols="50">
+<?=$detalhes?>		
+</textarea><br/>
+<?php
+if (isset($_SESSION['dados']['detalhes_gravados'])):
+?>
+<p>Foi encontrado um assunto igual na base de demandas com estes detalhes:</p>
+<p>
+<?=$_SESSION['dados']['detalhes_gravados']?>
+</p>
+<?php
+    unset($_SESSION['dados']['detalhes_gravados']);
+endif;
+?>   
+		<input type="submit" value="gravar" />
+	</form>
+</body>
+</html>
+<?php
+$_SESSION['dados'] = [];
+?>

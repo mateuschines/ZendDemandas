@@ -12,6 +12,8 @@ use Zend\Router\Http\Segment;
 use Zend\ServiceManager\Factory\InvokableFactory;
 use Application\Controller\IndexControllerFactory;
 use Application\Model\SolicitanteTableFactory;
+use Application\Model\AssuntoTableFactory;
+use Application\Model\DemandaTableFactory;
 
 return [
     'router' => [
@@ -61,7 +63,9 @@ return [
     ],
     'service_manager' => [
         'factories' => [
-            'SolicitanteTable' => SolicitanteTableFactory::class
+            'SolicitanteTable' => SolicitanteTableFactory::class,
+            'AssuntoTable' => AssuntoTableFactory::class,
+            'DemandaTable' => DemandaTableFactory::class,
         ]
     ]
 ];

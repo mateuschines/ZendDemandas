@@ -9,11 +9,10 @@ namespace Application\Controller;
 
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
-use Zend\Db\Sql\Insert;
-use Zend\Db\Sql\Select;
-use Zend\Db\Sql\Expression;
 use Interop\Container\ContainerInterface;
 use Application\Model\Solicitante;
+use Application\Model\Assunto;
+use Application\Model\Demanda;
 
 class IndexController extends AbstractActionController
 {
@@ -33,78 +32,48 @@ class IndexController extends AbstractActionController
     }
     
     public function processarAction()
-    {   
+    {
 
         $solicitante = new Solicitante($_POST);
         
-        $assunto = ($_POST['assunto'] ?? null);
-        $detalhes = ($_POST['detalhes'] ?? null);
+        $assunto = new Assunto($_POST);
+        
         $_SESSION['dados'] = [
             'solicitante' => $solicitante,
-            'assunto' => $assunto,
-            'detalhes' => $detalhes
+            'assunto' => $assunto
         ];
-            if (empty($solicitante->cpf) || empty($assunto) || empty(detalhes)) {
+        
+        if (empty($solicitante->cpf) || empty($assunto->assunto) || empty($assunto->detalhes)) {
                 $_SESSION['mensagem'] = 'Preencha os campos!';
                 return $this->redirect()->toRoute('application');//redireciona pra tal rota escrita
             }
 
             $solicitanteTable = $this->container->get('SolicitanteTable');
 
-            $solicitanteTable->persist($solicitante);
-            
-            $select = new Select('solicitante');
-            $select->columns(['cpf'])
-            ->where(['cpf' => $cpf]);
-            $sql = $select->getSqlString($adapter->getPlatform());
-            $statement = $adapter->query($sql);
-            $result = $statement->execute();
-            if ($result->count() == 0) {
-                $insert = new Insert('solicitante');
-                $insert->columns(['cpf','nome','cep','municipio','uf','email','ddd','telefone'])
-                ->values([$cpf,$nome,$cep,$municipio,$uf,$email,$ddd,$telefone]);
-                $sql = $insert->getSqlString($adapter->getPlatform());
+            if ($solicitanteTable->persist($solicitante)) {
                 
-                $statement = $adapter->query($sql);
-                $result = $statement->execute();
-            }
-
-                $select = new Select('assunto');
-                $select->columns(['assunto','detalhes'])
-                ->where(['assunto' => $assunto]);
-                $sql = $select->getSqlString($adapter->getPlatform());
-                $statement = $adapter->query($sql);
-                $result = $statement->execute();
-                if ($result->count() > 0) {
-                    $_SESSION['dados']['detalhes_gravados'] = $result->current()['detalhes'];
-                    return $this->redirect()->toRoute('application');
-
-                } else {
-                    $insert = new Insert('assunto');
-                    $insert->columns(['assunto','detalhes'])
-                    ->values([$assunto,$detalhes]);
-                    $sql = $insert->getSqlString($adapter->getPlatform());
-                    $statement = $adapter->query($sql);
-                    $result = $statement->execute();
-                    
-                    $expression = new Expression('max(codigo)');
-                    $select = new Select('assunto');
-                    $select->columns(['codigoAssunto' => $expression]);
-                    $sql = $select->getSqlString($adapter->getPlatform());
-                    $statement = $adapter->query($sql);
-                    $result = $statement->execute();
-                    $codigoAssunto = $result->current()['codigoAssunto'];
-                }
-                $adapter->getDriver()->getConnection()->disconnect();
-                $insert = new Insert('demanda');
-                $insert->columns(['codigo_solicitante','codigo_assunto'])
-                ->values([$cpf,$codigoAssunto]);
-                $sql = $insert->getSqlString($adapter->getPlatform());
-                $statement = $adapter->query($sql);
-                $result = $statement->execute();
+                $assuntoTable = $this->container->get('AssuntoTable');
+                
+                $assuntoTable->persist($assunto);
+                
+                $codigoAssunto = $assuntoTable->getMaxCodigo();
+                
+                $demandas = new Demanda($solicitante->cpf, $codigoAssunto);
+                
+                $demandasTable = $this->container->get('DemandaTable');
+                
+                $demandasTable->persist($demandas);
+                
                 $_SESSION['dados'] = [];
                 
                 return new ViewModel();
+            }
+            
+   
+
+            $_SESSION['mensagem'] = 'Campos Iguais';
+            return $this->redirect()->toRoute('application');
+                
 
     }
 }

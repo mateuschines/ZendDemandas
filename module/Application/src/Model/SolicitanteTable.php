@@ -3,6 +3,8 @@
 namespace Application\Model;
 
 use Zend\Db\TableGateway\TableGatewayInterface;
+use Zend\Db\Sql\Expression;
+use Zend\Db\Sql\Select;
 
 class SolicitanteTable
 {
@@ -23,8 +25,14 @@ class SolicitanteTable
         $result = $this->tableGateway->select(['cpf' => $set['cpf']]);
         if ($result->count() == 0){
             $this->tableGateway->insert($set);
+            return true;
         }
-        
+        return false;
+    }
+    
+    public function getByAssunto($assunto)
+    {
+        return $this->tableGateway->select( ['assunto' => $assunto]);
     }
     
     

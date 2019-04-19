@@ -18,7 +18,7 @@ class Solicitante
         $this->cpf = $data['cpf'] ?? null;
         $this->nome = $data['nome'] ?? null;
         $this->cep = $data['cep'] ?? null;
-        $this->minicipio = $data['minicipio'] ?? null;
+        $this->municipio = $data['municipio'] ?? null;
         $this->uf = $data['uf'] ?? null;
         $this->email = $data['email'] ?? null;
         $this->ddd = $data['ddd'] ?? null;
